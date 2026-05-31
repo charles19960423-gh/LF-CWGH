@@ -1,0 +1,26 @@
+# 林峰 Life OS 开发规则
+
+## 产品
+- 产品名：林峰 Life OS · 成为你自己 · BEING YOURSELF
+- V1 只做财富系统，其他系统仅占位
+- 核心用户：个体创业者，年入 10-100 万
+- 不是记账工具，是财富驾驶舱
+
+## 技术栈
+- Next.js App Router + TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase (PostgreSQL + Auth + RLS)
+- Server Actions
+- OpenAI API（第五阶段）
+
+## 代码规范
+- Server Component 默认，"use client" 仅交互部分
+- 金额用 formatCurrency() 展示
+- 所有 DB 操作带 user_id
+- Action 返回 { success, data?, error? }
+- 中文 UI，英文代码
+
+## 参照
+- IA：../01-产品规划/IA-V1.md
+- 原型：../02-交互设计/页面原型图-低保真.md
+- 数据库：../03-技术设计/数据库设计.md
