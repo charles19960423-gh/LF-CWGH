@@ -8,6 +8,16 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
+function isTableMissingError(error: { message?: string; code?: string }): boolean {
+  const msg = (error.message ?? "").toLowerCase();
+  return (
+    error.code === "PGRST205" ||
+    error.code === "42P01" ||
+    msg.includes("could not find the table") ||
+    (msg.includes("relation") && msg.includes("does not exist"))
+  );
+}
+
 export async function checkDatabaseConnection(): Promise<{
   configured: boolean;
   connected: boolean;
@@ -24,13 +34,47 @@ export async function checkDatabaseConnection(): Promise<{
   }
 
   const supabase = await createClient();
-  const tables = ["users", "transactions", "assets", "liabilities", "goals", "reports"] as const;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      configured: true,
+      connected: false,
+      tables: [],
+      error: "请先登录后再检测数据库",
+    };
+  }
+
+  const tables = [
+    "users",
+    "transactions",
+    "assets",
+    "liabilities",
+    "goals",
+    "reports",
+  ] as const;
+  const ready: string[] = [];
   const missing: string[] = [];
 
   for (const table of tables) {
-    const { error } = await supabase.from(table).select("*", { head: true, count: "exact" });
+    const query =
+      table === "users"
+        ? supabase.from("users").select("id").eq("id", user.id).limit(1)
+        : supabase.from(table).select("id").eq("user_id", user.id).limit(1);
+
+    const { error } = await query;
+
     if (error) {
-      missing.push(table);
+      if (isTableMissingError(error)) {
+        missing.push(table);
+      } else {
+        // 表存在但查询报错（如 RLS），仍视为已迁移
+        ready.push(table);
+      }
+    } else {
+      ready.push(table);
     }
   }
 
@@ -38,7 +82,7 @@ export async function checkDatabaseConnection(): Promise<{
     return {
       configured: true,
       connected: false,
-      tables: tables.filter((t) => !missing.includes(t)),
+      tables: ready,
       error: `缺少表或未迁移: ${missing.join(", ")}`,
     };
   }

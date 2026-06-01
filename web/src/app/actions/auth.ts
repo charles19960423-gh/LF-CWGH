@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserProfile } from "@/lib/database/users";
+import { mapAuthError } from "@/lib/auth-errors";
 
 export type AuthResult =
   | { success: true }
@@ -27,7 +28,7 @@ export async function signIn(
   });
 
   if (error) {
-    return { success: false, error: "登录失败，请检查邮箱和密码" };
+    return { success: false, error: mapAuthError(error.message) };
   }
 
   if (data.user) {
@@ -64,7 +65,16 @@ export async function signUp(
   });
 
   if (error) {
-    return { success: false, error: error.message || "注册失败" };
+    return { success: false, error: mapAuthError(error.message) };
+  }
+
+  // 开启了邮箱验证时：有 user 但没有 session，无法直接登录
+  if (data.user && !data.session) {
+    return {
+      success: false,
+      error:
+        "注册成功，但需验证邮箱后才能登录。请查收邮件，或在 Supabase → Authentication → Email 关闭 Confirm email 后重新注册",
+    };
   }
 
   if (data.user) {

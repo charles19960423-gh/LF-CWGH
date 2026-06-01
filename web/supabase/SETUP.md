@@ -41,6 +41,7 @@ npm run dev
 2. 点击 **New query**
 3. 复制粘贴 `migrations/001_initial_schema.sql` 全部内容 → 点击 **Run**
 4. 再复制粘贴 `migrations/002_updated_at_triggers.sql` → 点击 **Run**
+5. 再复制粘贴 `migrations/003_grant_permissions.sql` → 点击 **Run**（修复 42501 权限错误）
 
 ---
 
@@ -82,8 +83,8 @@ npm run dev
 **Q: 注册后 users 表没有数据？**  
 A: 确认 001 迁移中的 `handle_new_user` 触发器已执行。App 端也会在注册时 fallback 写入。
 
-**Q: RLS 报错 permission denied？**  
-A: 确认使用的是 `anon` key（不是 service_role），且用户已登录。
+**Q: RLS 报错 permission denied（42501）？**  
+A: 在 SQL Editor 执行 `003_grant_permissions.sql`，授予 `authenticated` 角色表访问权限。
 
 **Q: 本地无法连接？**  
 A: 检查 `.env.local` 是否在 `web/` 目录下，且变量名正确。

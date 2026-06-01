@@ -42,9 +42,19 @@ src/
 | 阶段 | 状态 |
 |------|------|
 | 1 搭框架 | ✅ |
-| 2 数据库 | ✅ 代码就绪，待 Supabase 执行 SQL |
-| 3 核心功能 | 待做 |
-| 4 Dashboard | 待做 |
-| 5 AI | 待做 |
+| 2 数据库 | ✅ |
+| 3 核心功能 | ✅ 收入/支出/资产/负债 CRUD |
+| 4 Dashboard | ✅ 聚合指标 + 趋势图 + 目标页 |
+| 5 AI 复盘 | ✅ 月度复盘 + OpenAI 建议 |
 
 产品文档见上级目录 `01-产品规划/IA-V1.md`
+
+## 部署到 Vercel
+
+详见 [DEPLOY.md](./DEPLOY.md)
+
+要点：
+1. Vercel 导入 GitHub 仓库 **LF-CWGH**
+2. **Root Directory** 设为 `web`
+3. 配置环境变量：`NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY`、`OPENAI_API_KEY`
+4. Supabase Auth 添加 Vercel 域名到 Redirect URLs

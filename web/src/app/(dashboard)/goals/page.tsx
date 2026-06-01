@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
+import { GoalFormTrigger } from "@/components/goals/GoalFormDialog";
+import { GoalList } from "@/components/goals/GoalList";
+import { requireUserId } from "@/lib/auth-server";
+import { getAllGoalsWithMetrics } from "@/lib/queries/dashboard";
 
 export const metadata: Metadata = {
   title: "财务目标",
 };
 
-export default function GoalsPage() {
+export default async function GoalsPage() {
+  const userId = await requireUserId();
+  const goals = await getAllGoalsWithMetrics(userId);
+
   return (
     <>
-      <PageHeader title="财务目标" description="设定目标，系统自动计算每月需存金额" />
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          财务目标功能将在第三阶段开发
-        </CardContent>
-      </Card>
+      <PageHeader title="财务目标" description="设定目标，系统自动计算每月需存金额">
+        <GoalFormTrigger />
+      </PageHeader>
+
+      <GoalList goals={goals} />
     </>
   );
 }
